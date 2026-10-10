@@ -7,6 +7,9 @@ const schema = z.object({
     .refine((v) => v.startsWith("postgres://") || v.startsWith("postgresql://"), {
       message: "must be a postgres:// or postgresql:// connection string",
     }),
+  DASHBOARD_USER: z.string().min(1),
+  // Basic Auth has no lockout, so the password itself must resist guessing.
+  DASHBOARD_PASSWORD: z.string().min(12, "must be at least 12 characters"),
 });
 
 function loadEnv() {
