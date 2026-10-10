@@ -1,0 +1,64 @@
+.main {
+  --muted: #666;
+  --border: #e5e5e5;
+
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 16px;
+  font-family: var(--font-geist-sans);
+}
+
+.main h1 {
+  font-size: 28px;
+  margin-bottom: 24px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.table a {
+  text-decoration: underline;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  .main {
+    --muted: #999;
+    --border: #262626;
+  }
+}

@@ -43,3 +43,26 @@ export async function insertLead(lead: LeadInput): Promise<string> {
   // pg returns bigint as a string, since it can exceed Number.MAX_SAFE_INTEGER.
   return rows[0].id;
 }
+
+export type Lead = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  message: string | null;
+  source: string;
+  status: "new" | "contacted" | "qualified" | "lost";
+  created_at: Date;
+};
+
+export async function listLatestLeads(limit: number): Promise<Lead[]> {
+  const { rows } = await pool.query<Lead>(
+    `select id, name, email, phone, company, message, source, status, created_at
+     from leads
+     order by created_at desc
+     limit $1`,
+    [limit],
+  );
+  return rows;
+}
