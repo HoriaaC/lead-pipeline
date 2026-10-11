@@ -37,3 +37,11 @@ These are real notes, written as I went.
 - **How I noticed:** I looked at the actual emails in Gmail and sent a screenshot.
 - **How I fixed it:** set Email Format back to a fixed `Text` value, put the template in the Text field, re-tested and checked the received email content.
 - **Lesson:** verify the final output a human sees (the email), not just the HTTP status. "No error" ≠ "correct".
+
+### 2026-10-11 CI — type-check passed locally, failed on GitHub
+- **What I asked:** add GitHub Actions CI (lint, type-check, tests, build).
+- **What it produced:** a workflow running `npx tsc --noEmit`; it had passed locally, so the agent pushed it.
+- **What was wrong (or risky):** the first CI run failed with `Cannot find name 'LayoutProps'`. That type comes from files Next generates (`next-env.d.ts`, `.next/types`), which are gitignored. Locally they existed because `next dev` had created them; a fresh CI checkout has none.
+- **How I noticed:** the agent checked the CI result after pushing instead of assuming green, and read the failing step's annotations.
+- **How I fixed it:** reproduced it locally by removing the generated files (same error), then added `npm run typecheck` = `next typegen && tsc --noEmit` (the approach the Next 16 docs recommend for CI). Second run green.
+- **Lesson:** "works on my machine" includes ignored and generated files. A clean CI checkout is the real test.
