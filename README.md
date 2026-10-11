@@ -1,5 +1,7 @@
 # lead-pipeline
 
+[![CI](https://github.com/HoriaaC/lead-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/HoriaaC/lead-pipeline/actions/workflows/ci.yml)
+
 A small, end-to-end lead-generation pipeline: a landing form stores leads in Postgres,
 a signed webhook triggers an n8n email, a daily cron sends a summary, a protected
 dashboard lists the leads, and a **read-only MCP server** lets an AI agent query them.
@@ -78,7 +80,7 @@ flowchart LR
 
 ## Local setup
 
-Requirements: Node.js **20.6+** (for `--env-file`), a Supabase project, and (optionally)
+Requirements: Node.js **22+** (for `--env-file` and test globs; CI uses 24), a Supabase project, and (optionally)
 an n8n instance for the emails.
 
 ```bash
