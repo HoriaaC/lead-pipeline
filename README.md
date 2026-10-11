@@ -50,7 +50,7 @@ flowchart LR
 - **zod** at every boundary: HTTP body, env vars, MCP tool input
 - **n8n Cloud** for the email automations
 - **MCP** server with the official `@modelcontextprotocol/sdk`
-- Deploy target: Ubuntu 24.04 VPS, Nginx, Let's Encrypt, pm2 *(in progress)*
+- Deploy target: Ubuntu 24.04 VPS, Nginx, Let's Encrypt, pm2 *(planned, not deployed yet)*
 
 ## Key decisions
 
@@ -159,6 +159,11 @@ BUILD_LOG.md          honest log of agent mistakes and how they were caught
 
 ## Status
 
-Roadmap steps 1–6 are done (database, form + API, dashboard, signed webhook, daily
-summary, MCP server). **Next:** deploy to a VPS (Nginx, Let's Encrypt, pm2) and extend
-the RUNBOOK with deploy and "site is down" sections.
+Roadmap steps 1–6 are done: database, form + API, dashboard, signed webhook, daily
+summary, MCP server, plus unit tests and CI.
+
+**Not deployed yet.** The app runs locally against the hosted pieces (Supabase, n8n Cloud).
+The planned target is an Ubuntu 24.04 VPS with Nginx as reverse proxy, Let's Encrypt
+(certbot) for TLS, pm2 for the Next.js process, and the cron job from
+[`RUNBOOK.md`](RUNBOOK.md). Nothing in the code assumes a specific host: `after()` and
+`proxy.ts` run on a self-hosted Node server, and all configuration comes from `.env`.

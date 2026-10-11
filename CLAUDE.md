@@ -46,7 +46,7 @@ README.md  RUNBOOK.md  BUILD_LOG.md
 4. **Webhook → n8n:** after insert, POST to n8n with `X-Signature` = HMAC-SHA256 of the raw body. n8n verifies it, sends an email. Webhook failure must NOT fail the user's form submit (log it). n8n runs on **n8n Cloud**; secret in an n8n Crypto credential (see `webhook-hmac` skill).
 5. **Cron:** `scripts/daily-summary.ts` — counts leads from the last 24h, sends a summary. Crontab line documented in RUNBOOK.
 6. **MCP server:** tools `list_leads(limit, since?)` and `lead_stats(period)`. Read-only DB role. No write tools.
-7. **Deploy:** VPS, Nginx, SSL, pm2, `.env` on server. Write RUNBOOK.md as we go.
+7. **Deploy:** VPS, Nginx, SSL, pm2, `.env` on server. Write RUNBOOK.md as we go. *(Postponed: demoed locally for now.)*
 8. **Docs polish:** README (setup, architecture, decisions), RUNBOOK (deploy, "site is down" checklist).
 
 ## Data model (step 1)
