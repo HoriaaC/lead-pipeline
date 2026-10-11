@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { isAuthorized } from "@/lib/basic-auth";
 import { listLatestLeads } from "@/lib/leads";
 import styles from "./dashboard.module.css";
+import { LogoutButton } from "./logout-button";
 
 export const metadata = { title: "Leads dashboard", robots: { index: false } };
 
@@ -16,7 +17,10 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", {
 export default function DashboardPage() {
   return (
     <main className={styles.main}>
-      <h1>Latest leads</h1>
+      <div className={styles.header}>
+        <h1>Latest leads</h1>
+        <LogoutButton />
+      </div>
       {/* cacheComponents: request-time data (headers, DB) must sit inside Suspense. */}
       <Suspense fallback={<p className={styles.muted}>Loading…</p>}>
         <LeadsTable />
