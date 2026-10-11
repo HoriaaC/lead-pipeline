@@ -116,7 +116,7 @@ alter role leads_reader password '<random password>';
 |---|---|
 | `npm run dev` | dev server |
 | `npm run build && npm start` | production build + server |
-| `npm run lint` / `npx tsc --noEmit` | lint / type-check |
+| `npm run lint` / `npm run typecheck` | lint / type-check (generates Next route types first) |
 | `npm test` | unit tests (`node:test`, no DB or network needed) |
 | `npm run db:check` / `db:migrate` / `db:seed` | database |
 | `npm run summary` (`-- --dry-run`) | send (or just print) the daily summary |

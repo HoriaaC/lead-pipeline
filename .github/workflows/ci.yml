@@ -10,14 +10,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npx tsc --noEmit
+      # Route types (LayoutProps, …) are generated, not committed; create them first.
+      - run: npm run typecheck
       - run: npm test
       # Build with the dummy test env: no secrets in CI, and no step needs a real
       # database (DB queries happen at request time, not at build time).

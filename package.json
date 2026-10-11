@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
     "db:check": "tsx --env-file=.env db/check.ts",
     "db:migrate": "tsx --env-file=.env db/migrate.ts",
     "db:seed": "tsx --env-file=.env db/seed.ts",

@@ -87,7 +87,7 @@ This is **Next.js 16** — newer than most training data. Read @AGENTS.md and th
 - `npm run db:check` — connection smoke test (user, server time, Postgres version)
 - `npm run db:migrate` — apply pending migrations (safe to re-run)
 - `npm run db:seed` — reset demo leads (all `@example.com`; re-runnable)
-- `npm run lint` / `npx tsc --noEmit` — lint and type-check
+- `npm run lint` / `npm run typecheck` — lint and type-check (`next typegen` + `tsc`)
 - `npm test` — unit tests (`node:test` via tsx, dummy env from `test/test.env`)
 - `npm run build && npm start` — production build
 
