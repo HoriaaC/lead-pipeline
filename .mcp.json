@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lead-pipeline": {
+      "command": "node",
+      "args": ["--env-file=.env", "--import", "tsx", "mcp/server.ts"]
+    }
+  }
+}

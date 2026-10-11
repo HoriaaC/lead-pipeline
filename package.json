@@ -10,9 +10,11 @@
     "db:check": "tsx --env-file=.env db/check.ts",
     "db:migrate": "tsx --env-file=.env db/migrate.ts",
     "db:seed": "tsx --env-file=.env db/seed.ts",
-    "summary": "tsx --env-file=.env scripts/daily-summary.ts"
+    "summary": "tsx --env-file=.env scripts/daily-summary.ts",
+    "mcp": "node --env-file=.env --import tsx mcp/server.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "next": "16.4.0",
     "pg": "^8.23.1",
     "react": "19.3.0",
