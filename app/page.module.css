@@ -11,6 +11,17 @@
   font-family: var(--font-geist-sans);
 }
 
+.login {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
 .main h1 {
   font-size: 32px;
   margin-bottom: 8px;
