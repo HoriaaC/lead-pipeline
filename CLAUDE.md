@@ -18,7 +18,7 @@ Prefer less scope done well over more scope done shallowly.
 - **PostgreSQL** (Supabase-hosted), accessed with **`pg` (node-postgres)** and **plain SQL**
   - No ORM. No query builder. Parameterized queries only (`$1, $2…`), never string interpolation.
 - **zod** for input validation at every boundary (HTTP body, env vars, webhook payloads)
-- **n8n** for automation (workflow exported as JSON into `n8n/`)
+- **n8n Cloud** for automation (workflow exported as JSON into `n8n/`)
 - **Node script + cron** for the daily summary
 - **MCP server** (TypeScript, official `@modelcontextprotocol/sdk`), **read-only**
 - **Deploy:** Ubuntu 24.04 VPS, Nginx reverse proxy, Let's Encrypt (certbot), process manager = **pm2** (one choice, not Docker too)
@@ -43,7 +43,7 @@ README.md  RUNBOOK.md  BUILD_LOG.md
 1. **Scaffold + database:** Next.js app, `lib/env.ts`, `lib/db.ts`, migration runner, `001_create_leads.sql`, seed script.
 2. **Lead form + API:** landing page form, `POST /api/leads` with zod validation, correct status codes (201 / 400 / 500).
 3. **Dashboard:** `/dashboard` listing latest leads, protected by HTTP Basic Auth (`proxy.ts` — Next 16's rename of middleware) + a re-check in the page.
-4. **Webhook → n8n:** after insert, POST to n8n with `X-Signature` = HMAC-SHA256 of the raw body. n8n verifies it, sends an email. Webhook failure must NOT fail the user's form submit (log it).
+4. **Webhook → n8n:** after insert, POST to n8n with `X-Signature` = HMAC-SHA256 of the raw body. n8n verifies it, sends an email. Webhook failure must NOT fail the user's form submit (log it). n8n runs on **n8n Cloud**; secret in an n8n Crypto credential (see `webhook-hmac` skill).
 5. **Cron:** `scripts/daily-summary.ts` — counts leads from the last 24h, sends a summary. Crontab line documented in RUNBOOK.
 6. **MCP server:** tools `list_leads(limit, since?)` and `lead_stats(period)`. Read-only DB role. No write tools.
 7. **Deploy:** VPS, Nginx, SSL, pm2, `.env` on server. Write RUNBOOK.md as we go.

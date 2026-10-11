@@ -36,23 +36,49 @@ const ts = Math.floor(Date.now() / 1000).toString();
 const sig = createHmac("sha256", env.WEBHOOK_SECRET).update(`${ts}.${raw}`).digest("hex");
 ```
 
-## Receiver rules (n8n)
+## Receiver (n8n Cloud, workflow "New lead")
 
-1. Verify against the **raw** request body, not n8n's parsed JSON — re-serialized JSON
-   is not byte-identical. The Webhook node needs its raw-body option enabled.
-   **Check current n8n docs for the exact option name and how raw body is exposed
-   to the Code node — do not guess.**
-2. Recompute the HMAC over `timestamp + "." + rawBody`, compare with
-   `crypto.timingSafeEqual` on equal-length Buffers (check lengths first —
-   `timingSafeEqual` throws on mismatch).
-3. Reject if `|now - timestamp| > 300` seconds.
-4. On failure: respond 401 and stop — no email.
-5. The secret lives in n8n credentials/env, never pasted into the exported workflow JSON
-   in `n8n/`. Check the export for secrets before committing.
+Exported to `n8n/new-lead-workflow.json`. The live workflow runs in n8n Cloud; the
+export is a copy for git (From/To emails replaced with `you@example.com`).
+
+```
+Webhook → Code "Signing input" → Crypto "HMAC" → Code "Verify" → IF valid
+                                                    ├─ true  → Send Email (SMTP) → Respond 200
+                                                    └─ false → Respond 401 {"error":"invalid signature"}
+```
+
+1. **Webhook**: POST, path `new-lead`, Respond = `Using 'Respond to Webhook' Node`,
+   option **Raw Body** on. With Raw Body on, the exact request bytes land in the
+   **binary property `data`**; `$json.body` is n8n's parsed copy and must NOT be signed.
+   Headers arrive lowercase: `x-timestamp`, `x-signature`.
+2. **Signing input** (Code): `await this.helpers.getBinaryDataBuffer(0, 'data')` →
+   utf8 string → outputs `toSign = ts + "." + raw`, plus `ts` and `sig`.
+3. **HMAC** (Crypto node, Hmac / SHA256 / HEX, value `{{ $json.toSign }}`, output `expected`).
+   The secret is the **Crypto credential `lead-webhook-secret`** ("Hmac Secret" field).
+   Why a credential: n8n Cloud has no `.env` for us, and custom variables (`$vars`) are
+   paid-plan only. Credentials are stored encrypted and are NOT included in the export.
+4. **Verify** (Code): `require('crypto')` works on n8n Cloud without config. Compare
+   `sha256=<expected>` with the header via `crypto.timingSafeEqual` (lengths checked
+   first — it throws on mismatch); reject if `|now - ts| > 300` s or ts isn't digits.
+   Outputs `{ valid }`.
+5. **IF** `{{ $json.valid }}` is true (Boolean). True → email, false → 401, no email.
+6. **Send Email**: SMTP credential `lead-notify-smtp` — `smtp.gmail.com`, port 465, SSL on,
+   User = full Gmail address, Password = 16-char Google **App Password** (no spaces).
+   Email Format = fixed `Text` (not an expression), body in the Text field; fields read
+   from `$('Webhook').item.json.body` — safe because the signature already passed.
+   n8n attribution turned off.
+
+Before committing a new export: check it doesn't contain the secret value, credentials
+appear only as `{ id, name }` references, and `pinData` is empty.
+
+Test URL `/webhook-test/new-lead` works for one call after "Execute workflow";
+production URL `/webhook/new-lead` only while the workflow is published.
 
 ## Verify
 
-- Valid signed request → n8n sends the email.
+- Valid signed request → 200, email arrives.
 - Tamper one byte of the body → 401.
 - Old timestamp (e.g. now − 600) → 401.
-- n8n stopped / wrong URL → form still returns 201, server log shows the failure.
+- No signature headers → 401.
+- Wrong URL / n8n down → form still returns 201, server log shows
+  `[webhook] lead N: n8n responded 404` (or the fetch error).
