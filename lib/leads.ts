@@ -33,15 +33,15 @@ export const leadInput = z.object({
 
 export type LeadInput = z.infer<typeof leadInput>;
 
-export async function insertLead(lead: LeadInput): Promise<string> {
-  const { rows } = await pool.query<{ id: string }>(
+export async function insertLead(lead: LeadInput): Promise<{ id: string; created_at: Date }> {
+  const { rows } = await pool.query<{ id: string; created_at: Date }>(
     `insert into leads (name, email, phone, company, message, source)
      values ($1, $2, $3, $4, $5, $6)
-     returning id`,
+     returning id, created_at`,
     [lead.name, lead.email, lead.phone, lead.company, lead.message, lead.source],
   );
   // pg returns bigint as a string, since it can exceed Number.MAX_SAFE_INTEGER.
-  return rows[0].id;
+  return rows[0];
 }
 
 export type Lead = {
