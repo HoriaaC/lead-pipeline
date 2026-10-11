@@ -88,6 +88,7 @@ This is **Next.js 16** — newer than most training data. Read @AGENTS.md and th
 - `npm run db:migrate` — apply pending migrations (safe to re-run)
 - `npm run db:seed` — reset demo leads (all `@example.com`; re-runnable)
 - `npm run lint` / `npx tsc --noEmit` — lint and type-check
+- `npm test` — unit tests (`node:test` via tsx, dummy env from `test/test.env`)
 - `npm run build && npm start` — production build
 
 Scripts in `db/` and `scripts/` run with **tsx** and load `.env` via `--env-file`.

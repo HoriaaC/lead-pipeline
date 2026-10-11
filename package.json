@@ -11,7 +11,8 @@
     "db:migrate": "tsx --env-file=.env db/migrate.ts",
     "db:seed": "tsx --env-file=.env db/seed.ts",
     "summary": "tsx --env-file=.env scripts/daily-summary.ts",
-    "mcp": "node --env-file=.env --import tsx mcp/server.ts"
+    "mcp": "node --env-file=.env --import tsx mcp/server.ts",
+    "test": "node --env-file=test/test.env --import tsx --test \"test/**/*.test.ts\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
