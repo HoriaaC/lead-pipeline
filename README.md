@@ -86,7 +86,7 @@ npm install
 cp .env.example .env          # fill in the values; comments in the file explain each one
 npm run db:check              # connection smoke test
 npm run db:migrate            # create tables + read-only role (safe to re-run)
-npm run db:seed               # optional: 6 fake leads (source = 'seed')
+npm run db:seed               # optional: reset 14 demo leads (@example.com)
 npm run dev                   # http://localhost:3000
 ```
 
