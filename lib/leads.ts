@@ -66,3 +66,28 @@ export async function listLatestLeads(limit: number): Promise<Lead[]> {
   );
   return rows;
 }
+
+export type LeadSummary = {
+  bySource: { source: string; count: number }[];
+  latest: Pick<Lead, "id" | "name" | "company" | "created_at">[];
+};
+
+// Leads received in the last `hours` hours: counts per source + the 10 newest.
+export async function leadSummarySince(hours: number): Promise<LeadSummary> {
+  const [bySource, latest] = await Promise.all([
+    // count(*) is bigint, which pg returns as a string; ::int is safe for per-day counts.
+    pool.query<{ source: string; count: number }>(
+      `select source, count(*)::int as count
+       from leads where created_at >= now() - make_interval(hours => $1)
+       group by source order by count desc, source`,
+      [hours],
+    ),
+    pool.query<LeadSummary["latest"][number]>(
+      `select id, name, company, created_at
+       from leads where created_at >= now() - make_interval(hours => $1)
+       order by created_at desc limit 10`,
+      [hours],
+    ),
+  ]);
+  return { bySource: bySource.rows, latest: latest.rows };
+}

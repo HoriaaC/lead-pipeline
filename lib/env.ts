@@ -11,6 +11,7 @@ const schema = z.object({
   // Basic Auth has no lockout, so the password itself must resist guessing.
   DASHBOARD_PASSWORD: z.string().min(12, "must be at least 12 characters"),
   N8N_WEBHOOK_URL: z.url(),
+  N8N_SUMMARY_WEBHOOK_URL: z.url(),
   // Shared with n8n; 32+ chars so the HMAC key can't be brute-forced.
   WEBHOOK_SECRET: z.string().min(32, "must be at least 32 characters"),
 });
