@@ -1,0 +1,254 @@
+{
+  "name": "New Lead",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-lead",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "243a1d7a-d593-409c-8b44-42dcb7c0b677",
+      "name": "Webhook",
+      "webhookId": "9daf1d13-9b23-4a04-992e-1f6efc78636d"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sign the raw bytes (binary \"data\"), not $json.body: n8n's parsed JSON isn't byte-identical.\nconst raw = (await this.helpers.getBinaryDataBuffer(0, 'data')).toString('utf8');\nconst h = $input.first().json.headers;\nreturn [{ json: { toSign: `${h['x-timestamp']}.${raw}`, ts: h['x-timestamp'] ?? '', sig: h['x-signature'] ?? '' } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "993daecd-152f-4ac2-ac69-eb16060e0b05",
+      "name": "Signing input"
+    },
+    {
+      "parameters": {
+        "action": "hmac",
+        "value": "={{ $json.toSign }}",
+        "dataPropertyName": "expected"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "641582d6-535e-41d4-b252-8fd434f0a679",
+      "name": "HMAC",
+      "credentials": {
+        "crypto": {
+          "id": "isbBr2gnAozHjC1y",
+          "name": "lead-webhook-secret"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst { sig, ts, expected } = $input.first().json;\n\n// timingSafeEqual throws on different lengths, so check lengths first.\nconst got = Buffer.from(String(sig));\nconst want = Buffer.from(`sha256=${expected}`);\nconst sigOk = got.length === want.length && crypto.timingSafeEqual(got, want);\n\n// Reject anything older/newer than 5 min, so a captured request can't be replayed later.\nconst fresh = /^\\d+$/.test(ts) && Math.abs(Date.now() / 1000 - Number(ts)) <= 300;\n\nreturn [{ json: { valid: sigOk && fresh } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "0e2611b4-8294-4b61-85cf-10c6c4829408",
+      "name": "Verify"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "eec355c0-4298-48fb-b6c0-463d240ca5b5",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        0
+      ],
+      "id": "0e3e07fe-ae1b-41a2-8ab6-57ee475dca78",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "you@example.com",
+        "toEmail": "you@example.com",
+        "subject": "=New lead: {{ $('Webhook').item.json.body.name }}",
+        "emailFormat": "text",
+        "text": "=Name: {{ $('Webhook').item.json.body.name }}\nEmail: {{ $('Webhook').item.json.body.email }}\nCompany: {{ $('Webhook').item.json.body.company }}\nSource: {{ $('Webhook').item.json.body.source }}\nLead #{{ $('Webhook').item.json.body.id }} at {{ $('Webhook').item.json.body.created_at }}\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        -96
+      ],
+      "id": "9b24cc09-61dd-4898-b888-a932e17683dc",
+      "name": "Send an Email",
+      "webhookId": "1a82ec42-b766-4269-b508-292696fb8595",
+      "credentials": {
+        "smtp": {
+          "id": "0yHxMN3zlRZ6tas5",
+          "name": "lead-notify-smtp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "noData",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1344,
+        -96
+      ],
+      "id": "9f5d5d07-23eb-4a82-9675-1d097d19b650",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\":\"invalid signature\"}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "f1a769b3-3a98-4ce9-bdcb-691db255a9ea",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Signing input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signing input": {
+      "main": [
+        [
+          {
+            "node": "HMAC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HMAC": {
+      "main": [
+        [
+          {
+            "node": "Verify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "364b3bfb-f9bb-4c21-93f0-b8f0a7f888fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5caf6dd41f333079b84ff153d7906659b6f0cf6c7f20cdf94447c479cb56665c"
+  },
+  "nodeGroups": [],
+  "id": "4nxSycheffz9yDPK",
+  "tags": []
+}
